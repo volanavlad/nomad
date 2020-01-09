@@ -4380,7 +4380,7 @@ const (
 	TaskLifecycleBlockUntilRunning   = "running"
 	TaskLifecycleBlockUntilCompleted = "completed"
 	TaskLifecycleDeadlineMinimum     = 0 * time.Second
-	TaskLifecycleDeadlineDefault     = 10 * time.Second
+	TaskLifecycleDeadlineDefault     = 120 * time.Second
 )
 
 type TaskLifecycleConfig struct {
