@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/nomad/nomad/structs"
 )
 
 const (
@@ -597,6 +595,14 @@ type DispatchPayloadConfig struct {
 	File string
 }
 
+const (
+	TaskLifecycleHookPrestart        = "prestart"
+	TaskLifecycleBlockUntilRunning   = "running"
+	TaskLifecycleBlockUntilCompleted = "completed"
+	TaskLifecycleDeadlineMinimum     = 0 * time.Second
+	TaskLifecycleDeadlineDefault     = 120 * time.Second
+)
+
 type TaskLifecycle struct {
 	Hook       string        `mapstructure:"hook"`
 	BlockUntil string        `mapstructure:"block_until"`
@@ -605,7 +611,7 @@ type TaskLifecycle struct {
 
 func (l *TaskLifecycle) Canonicalize() {
 	if l.Deadline == 0 {
-		l.Deadline = structs.TaskLifecycleDeadlineDefault
+		l.Deadline = TaskLifecycleDeadlineDefault
 	}
 }
 
