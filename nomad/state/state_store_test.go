@@ -6382,6 +6382,39 @@ func TestStateStore_UpsertDeploymentAllocHealth_BadAlloc_Nonexistent(t *testing.
 	}
 }
 
+// Test that a deployments PlacedCanaries is properly updated
+func TestStateStore_UpsertDeploymentAlloc_Canaries(t *testing.T) {
+	t.Parallel()
+
+	state := testStateStore(t)
+
+	// Create a deployment
+	d1 := mock.Deployment()
+	require.NoError(t, state.UpsertDeployment(2, d1))
+
+	// Create a Job
+	job := mock.Job()
+	require.NoError(t, state.UpsertJob(3, job))
+
+	// Create alloc with canary status
+	a := mock.Alloc()
+	a.JobID = job.ID
+	a.DeploymentID = d1.ID
+	a.DeploymentStatus = &structs.AllocDeploymentStatus{
+		Healthy: helper.BoolToPtr(false),
+		Canary:  true,
+	}
+	require.NoError(t, state.UpsertAllocs(4, []*structs.Allocation{a}))
+
+	// Pull the deployment from state
+	ws := memdb.NewWatchSet()
+	deploy, err := state.DeploymentByID(ws, d1.ID)
+	require.NoError(t, err)
+
+	// Ensure that PlacedCanaries is accurate
+	require.Equal(t, 1, len(deploy.TaskGroups[job.TaskGroups[0].Name].PlacedCanaries))
+}
+
 // Test that allocation health can't be set for an alloc with mismatched
 // deployment ids
 func TestStateStore_UpsertDeploymentAllocHealth_BadAlloc_MismatchDeployment(t *testing.T) {
