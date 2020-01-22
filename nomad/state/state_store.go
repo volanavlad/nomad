@@ -3443,17 +3443,16 @@ func (s *StateStore) updateDeploymentWithAlloc(index uint64, alloc, existing *st
 	state.UnhealthyAllocs += unhealthy
 
 	// Ensure PlacedCanaries accurately reflects the alloc canary status
-	if alloc.DeploymentStatus != nil {
-		if alloc.DeploymentStatus.Canary {
-			found := false
-			for _, canary := range state.PlacedCanaries {
-				if alloc.ID == canary {
-					found = true
-				}
+	if alloc.DeploymentStatus != nil && alloc.DeploymentStatus.Canary {
+		found := false
+		for _, canary := range state.PlacedCanaries {
+			if alloc.ID == canary {
+				found = true
+				break
 			}
-			if !found {
-				state.PlacedCanaries = append(state.PlacedCanaries, alloc.ID)
-			}
+		}
+		if !found {
+			state.PlacedCanaries = append(state.PlacedCanaries, alloc.ID)
 		}
 	}
 
