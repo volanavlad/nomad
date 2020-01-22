@@ -3433,7 +3433,6 @@ func (s *StateStore) updateDeploymentWithAlloc(index uint64, alloc, existing *st
 		alloc.DeploymentStatus.ModifyIndex = index
 	}
 
-
 	// Create a copy of the deployment object
 	deploymentCopy := deployment.Copy()
 	deploymentCopy.ModifyIndex = index
