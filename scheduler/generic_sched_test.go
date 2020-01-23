@@ -2032,22 +2032,21 @@ func TestServiceSched_JobModify_Canaries(t *testing.T) {
 
 	// Ensure local state was not altered in scheduler
 	staleState, ok := plan.Deployment.TaskGroups[job.TaskGroups[0].Name]
-	assert.True(t, ok)
+	require.True(t, ok)
 
-	assert.Equal(t, 0, len(staleState.PlacedCanaries))
+	require.Equal(t, 0, len(staleState.PlacedCanaries))
 
 	ws := memdb.NewWatchSet()
 
 	// Grab the latest state
 	deploy, err := h.State.DeploymentByID(ws, plan.Deployment.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	state, ok := deploy.TaskGroups[job.TaskGroups[0].Name]
-	assert.True(t, ok)
+	require.True(t, ok)
 
-	if state.DesiredTotal != 10 && state.DesiredCanaries != desiredUpdates {
-		assert.Fail(t, "expected desired total 10, canaries to match updates")
-	}
+	require.Equal(t, 10, state.DesiredTotal)
+	require.Equal(t, state.DesiredCanaries, desiredUpdates)
 
 	// Assert the canaries were added to the placed list
 	if len(state.PlacedCanaries) != desiredUpdates {
