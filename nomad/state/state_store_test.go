@@ -6413,6 +6413,44 @@ func TestStateStore_UpsertDeploymentAlloc_Canaries(t *testing.T) {
 
 	// Ensure that PlacedCanaries is accurate
 	require.Equal(t, 1, len(deploy.TaskGroups[job.TaskGroups[0].Name].PlacedCanaries))
+
+	// Create alloc without canary status
+	b := mock.Alloc()
+	b.JobID = job.ID
+	b.DeploymentID = d1.ID
+	b.DeploymentStatus = &structs.AllocDeploymentStatus{
+		Healthy: helper.BoolToPtr(false),
+		Canary:  false,
+	}
+	require.NoError(t, state.UpsertAllocs(4, []*structs.Allocation{b}))
+
+	// Pull the deployment from state
+	ws = memdb.NewWatchSet()
+	deploy, err = state.DeploymentByID(ws, d1.ID)
+	require.NoError(t, err)
+
+	// Ensure that PlacedCanaries is accurate
+	require.Equal(t, 1, len(deploy.TaskGroups[job.TaskGroups[0].Name].PlacedCanaries))
+
+	// Create a second deployment
+	d2 := mock.Deployment()
+	require.NoError(t, state.UpsertDeployment(5, d2))
+
+	c := mock.Alloc()
+	c.JobID = job.ID
+	c.DeploymentID = d2.ID
+	c.DeploymentStatus = &structs.AllocDeploymentStatus{
+		Healthy: helper.BoolToPtr(false),
+		Canary:  true,
+	}
+	require.NoError(t, state.UpsertAllocs(6, []*structs.Allocation{c}))
+
+	ws = memdb.NewWatchSet()
+	deploy2, err := state.DeploymentByID(ws, d2.ID)
+	require.NoError(t, err)
+
+	// Ensure that PlacedCanaries is accurate
+	require.Equal(t, 1, len(deploy2.TaskGroups[job.TaskGroups[0].Name].PlacedCanaries))
 }
 
 func TestStateStore_UpsertDeploymentAlloc_NoCanaries(t *testing.T) {
