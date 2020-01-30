@@ -2759,7 +2759,6 @@ func TestTaskLifecycleConfig_Validate(t *testing.T) {
 			tlc: &TaskLifecycleConfig{
 				Hook:       "prestart",
 				BlockUntil: "completed",
-				Deadline:   10 * time.Second,
 			},
 			err: nil,
 		},
@@ -2768,7 +2767,6 @@ func TestTaskLifecycleConfig_Validate(t *testing.T) {
 			tlc: &TaskLifecycleConfig{
 				Hook:       "prestart",
 				BlockUntil: "running",
-				Deadline:   10 * time.Second,
 			},
 			err: nil,
 		},
@@ -2776,26 +2774,15 @@ func TestTaskLifecycleConfig_Validate(t *testing.T) {
 			name: "no hook",
 			tlc: &TaskLifecycleConfig{
 				BlockUntil: "completed",
-				Deadline:   10 * time.Second,
 			},
 			err: fmt.Errorf("no lifecycle hook provided"),
 		},
 		{
 			name: "no block until",
 			tlc: &TaskLifecycleConfig{
-				Hook:     "prestart",
-				Deadline: 10 * time.Second,
+				Hook: "prestart",
 			},
 			err: fmt.Errorf("no lifecycle block_until provided"),
-		},
-		{
-			name: "negative deadline",
-			tlc: &TaskLifecycleConfig{
-				Hook:       "prestart",
-				BlockUntil: "completed",
-				Deadline:   -10 * time.Second,
-			},
-			err: fmt.Errorf("invalid deadline, must be greater than 0s: %v", -10*time.Second),
 		},
 	}
 

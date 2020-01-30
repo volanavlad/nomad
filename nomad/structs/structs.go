@@ -4379,14 +4379,11 @@ const (
 	TaskLifecycleHookPrestart        = "prestart"
 	TaskLifecycleBlockUntilRunning   = "running"
 	TaskLifecycleBlockUntilCompleted = "completed"
-	TaskLifecycleDeadlineMinimum     = 0 * time.Second
-	TaskLifecycleDeadlineDefault     = 120 * time.Second
 )
 
 type TaskLifecycleConfig struct {
 	Hook       string
 	BlockUntil string
-	Deadline   time.Duration
 }
 
 func (d *TaskLifecycleConfig) Copy() *TaskLifecycleConfig {
@@ -4417,10 +4414,6 @@ func (d *TaskLifecycleConfig) Validate() error {
 		return fmt.Errorf("no lifecycle block_until provided")
 	default:
 		return fmt.Errorf("invalid block_until: %v", d.BlockUntil)
-	}
-
-	if d.Deadline < TaskLifecycleDeadlineMinimum {
-		return fmt.Errorf("invalid deadline, must be greater than 0s: %v", d.Deadline)
 	}
 
 	return nil

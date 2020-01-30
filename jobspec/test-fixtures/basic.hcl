@@ -286,7 +286,6 @@ job "binstore-storagelocker" {
       lifecycle {
         hook = "prestart"
         block_until = "completed"
-        deadline = "7s"
       }
 
       config {
