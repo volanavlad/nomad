@@ -429,6 +429,10 @@ type CSIVolumeClaimRequest struct {
 	WriteRequest
 }
 
+type CSIVolumeClaimResponse struct {
+	QueryMeta
+}
+
 type CSIVolumeListRequest struct {
 	PluginID string
 	QueryOptions

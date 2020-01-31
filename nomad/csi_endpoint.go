@@ -265,6 +265,38 @@ func (v *CSIVolume) Deregister(args *structs.CSIVolumeDeregisterRequest, reply *
 	return v.srv.replySetIndex(csiVolumeTable, &reply.QueryMeta)
 }
 
+// Claim claims a volume
+func (v *CSIVolume) Claim(args *structs.CSIVolumeClaimRequest, reply *structs.CSIVolumeClaimResponse) error {
+	if done, err := v.srv.forward("CSIVolume.Claim", args, args, reply); done {
+		return err
+	}
+
+	aclObj, err := v.srv.WriteACLObj(&args.WriteRequest)
+	if err != nil {
+		return err
+	}
+
+	metricsStart := time.Now()
+	defer metrics.MeasureSince([]string{"nomad", "volume", "claim"}, metricsStart)
+
+	if !aclObj.AllowNsOp(args.RequestNamespace(), acl.NamespaceCapabilityCSICreateVolume) {
+		return structs.ErrPermissionDenied
+	}
+
+	state := v.srv.State()
+	index, err := state.LatestIndex()
+	if err != nil {
+		return err
+	}
+
+	err = state.CSIVolumeClaim(index, args.VolumeID, args.Allocation, args.Claim)
+	if err != nil {
+		return err
+	}
+
+	return v.srv.replySetIndex(csiVolumeTable, &reply.QueryMeta)
+}
+
 // CSIPlugin wraps the structs.CSIPlugin with request data and server context
 type CSIPlugin struct {
 	srv    *Server
